@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hong Kong Trip Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&family=Mali:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#fbf5e8; --card:#fffdf8; --ink:#2b2622; --muted:#7a6f63;
+    --red:#c8102e; --gold:#e3a72f; --line:#eadfcb; --path:#d9c9ad;
+    --p1:#c8102e; --p2:#2e7d5b; --p3:#e07a1f; --sea:#2b8fd6;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Prompt',system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:600px;margin:0 auto;padding:0 18px 48px}
+
+  header{background:var(--red);color:#fff;padding:34px 22px 28px;border-radius:0 0 28px 28px;position:relative;overflow:hidden}
+  header::after{content:"";position:absolute;right:-40px;top:-40px;width:180px;height:180px;border-radius:50%;background:rgba(255,255,255,.08)}
+  header .kicker{font-size:13px;letter-spacing:.12em;text-transform:uppercase;opacity:.85}
+  header h1{font-size:38px;font-weight:700;line-height:1.1;margin:6px 0 8px}
+  header p{font-size:15px;opacity:.92}
+
+  /* map card */
+  .mapcard{background:var(--card);border:1px solid var(--line);border-radius:20px;margin-top:-16px;position:relative;z-index:1;box-shadow:0 6px 18px rgba(0,0,0,.06);overflow:hidden}
+  .mapcard .mapbox{cursor:zoom-in;display:block;line-height:0;background:#8fd3f4}
+  .tabs{display:flex;gap:6px;padding:10px 10px 8px;background:var(--card)}
+  .tab{flex:1;font:inherit;font-size:13px;font-weight:600;padding:8px 6px;border-radius:10px;border:1px solid var(--line);background:#fff;color:var(--muted);cursor:pointer}
+  .tab.on{background:#202124;color:#fff;border-color:#202124}
+  .mapcard svg{width:100%;height:auto;display:block}
+  .btnrow{display:flex;gap:8px;padding:12px}
+  .btn{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;font:inherit;font-size:14px;font-weight:600;padding:11px 10px;border-radius:12px;border:none;cursor:pointer;text-decoration:none}
+  .btn.primary{background:var(--red);color:#fff}
+  .btn.ghost{background:#fff1d6;color:#7a4b00;border:1px solid #f0d49a}
+  .btn svg{width:16px;height:16px}
+  .legend{display:flex;flex-wrap:wrap;gap:6px 14px;padding:0 14px 14px;font-size:12px;color:var(--muted)}
+  .legend i{display:inline-block;width:22px;height:0;border-top:3px dashed;vertical-align:middle;margin-right:5px}
+
+  /* roadmap */
+  .road{position:relative;margin-top:30px;padding-left:46px}
+  .road::before{content:"";position:absolute;left:18px;top:12px;bottom:40px;border-left:4px dashed var(--path)}
+  .phase{position:relative;margin:0 0 14px}
+  .phase .pin{position:absolute;left:-46px;top:0;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:700;font-size:17px;box-shadow:0 0 0 5px var(--bg)}
+  .phase h2{font-size:20px;font-weight:600;line-height:1.25;padding-top:6px}
+  .phase .when{display:inline-block;font-size:12px;font-weight:500;padding:2px 10px;border-radius:999px;margin-top:4px}
+
+  .stop{position:relative;display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px;margin:10px 0;text-decoration:none;color:inherit;transition:transform .12s, box-shadow .12s}
+  .stop::before{content:"";position:absolute;left:-34px;top:50%;width:12px;height:12px;margin-top:-6px;border-radius:50%;background:var(--card);border:3px solid var(--path)}
+  a.stop:hover{box-shadow:0 4px 14px rgba(0,0,0,.07)}
+  a.stop:active{transform:scale(.98)}
+  .stop .icon{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;font-size:22px;flex:none;background:#fdeeee;position:relative}
+  .stop .icon em{position:absolute;right:-5px;top:-5px;font-style:normal;font-size:11px;font-weight:700;color:#fff;width:18px;height:18px;border-radius:50%;display:grid;place-items:center}
+  .stop .info{flex:1;min-width:0}
+  .stop .info b{display:block;font-size:15px;font-weight:600}
+  .stop .info span{display:block;font-size:13px;color:var(--muted)}
+  .go{flex:none;display:flex;align-items:center;gap:4px;background:var(--red);color:#fff;font-size:12px;font-weight:500;padding:7px 10px;border-radius:10px}
+  .go svg{width:13px;height:13px}
+  .walk{position:relative;font-size:12px;color:var(--muted);margin:-4px 0 0 6px}
+
+  .how{position:relative;background:#fff6dc;border:1.5px dashed var(--gold);border-radius:16px;padding:14px 14px 12px;margin:20px 0 26px}
+  .how::before{content:"";position:absolute;left:-38px;top:18px;width:20px;height:20px;border-radius:50%;background:var(--gold)}
+  .how h3{font-size:15px;font-weight:600;display:flex;align-items:center;gap:6px;margin-bottom:6px}
+  .how ol{padding-left:20px;font-size:14px}
+  .how li{margin:3px 0}
+  .how .meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+  .how .meta span{font-size:12px;background:#fff;border:1px solid #f0d49a;border-radius:999px;padding:2px 10px}
+  .how .alt{font-size:13px;color:var(--muted);margin-top:8px}
+
+  .finish{position:relative;margin-top:6px}
+  .finish .pin{position:absolute;left:-46px;top:-4px;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:var(--ink);font-size:18px;box-shadow:0 0 0 5px var(--bg)}
+  .finish p{font-weight:600;padding-top:4px}
+
+  .c1{background:var(--p1)}.c1b{background:#fde3e6;color:#9b0c23}
+  .c2{background:var(--p2)}.c2b{background:#dff1e8;color:#1f5a40}
+  .c3{background:var(--p3)}.c3b{background:#fdebd8;color:#9a4e0c}
+
+  .tips{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 16px;margin-top:28px;font-size:14px}
+  .tips h3{font-size:15px;margin-bottom:6px}
+  .tips ul{padding-left:18px}
+  .tips li{margin:3px 0}
+  .foodbox{position:relative;background:#fff;border:1px solid var(--line);border-radius:18px;padding:14px 12px 6px;margin:18px 0 8px}
+  .foodbox::before{content:"🍴";position:absolute;left:-44px;top:12px;width:28px;height:28px;border-radius:50%;background:#fff;border:2px solid var(--path);display:grid;place-items:center;font-size:13px}
+  .foodbox h3{font-size:15px;font-weight:600;margin:0 2px 8px}
+  .food{display:flex;align-items:center;gap:10px;padding:10px 4px;border-top:1px dashed var(--line);text-decoration:none;color:inherit}
+  .food:first-of-type{border-top:none}
+  .ficon{width:38px;height:38px;border-radius:10px;background:#fff1d6;display:grid;place-items:center;font-size:19px;flex:none}
+  .finfo{flex:1;min-width:0}
+  .finfo b{display:block;font-size:14px;font-weight:600}
+  .finfo span{display:block;font-size:12.5px;color:var(--muted);line-height:1.4}
+  .ftags{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+  .ftags i{font-style:normal;font-size:11px;background:#f6f1e7;border-radius:999px;padding:1px 8px;color:#6b5f52}
+  .fgo{flex:none;display:flex;align-items:center;gap:3px;font-size:12px;font-weight:600;color:var(--red);border:1.5px solid var(--red);padding:5px 8px;border-radius:9px}
+  .fgo svg{width:12px;height:12px}
+  .fnote{font-size:14px;padding:4px 2px 10px}
+  .hotel{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px;margin-top:-16px;position:relative;z-index:2;box-shadow:0 6px 18px rgba(0,0,0,.06);text-decoration:none;color:inherit}
+  .hicon{width:46px;height:46px;border-radius:14px;background:#fde3e6;display:grid;place-items:center;font-size:24px;flex:none}
+  .hinfo{flex:1;min-width:0}
+  .hinfo small{display:block;font-size:12px;color:var(--red);font-weight:600}
+  .hinfo b{display:block;font-size:16px;font-weight:600;line-height:1.3}
+  .hinfo span{display:block;font-size:12.5px;color:var(--muted);line-height:1.4;margin-top:2px}
+  .daytabs{position:sticky;top:0;z-index:20;display:flex;gap:6px;background:var(--bg);padding:12px 0 10px;margin-top:6px}
+  .daytabs a{flex:1;text-decoration:none;text-align:center;background:#fff;border:1px solid var(--line);border-radius:14px;padding:8px 4px;color:var(--muted)}
+  .daytabs a b{display:block;font-size:15px;color:var(--ink)}
+  .daytabs a span{display:block;font-size:11.5px}
+  .daytabs a.on{background:var(--red);border-color:var(--red);color:#ffe3e6}
+  .daytabs a.on b{color:#fff}
+  .day{scroll-margin-top:90px}
+  .dayhead{margin:8px 0 14px}
+  .dchip{display:inline-block;font-size:12px;font-weight:600;color:var(--red);background:#fde3e6;border-radius:999px;padding:2px 10px}
+  .dayhead h2{font-size:21px;font-weight:700;line-height:1.3;margin-top:6px}
+  .dayhead p{font-size:14px;color:var(--muted)}
+  .tourbox{background:#efe6f7;border:1px solid #d9c6ea;color:#4b2a63;border-radius:14px;padding:10px 12px;font-size:13.5px;margin-bottom:14px}
+  .c4{background:#7b3fa0}.c4b{background:#efe6f7;color:#5a2d78}
+  .mapcard{margin-top:0}
+  .cafebox{background:#fffaf3;border-color:#efd9b8}
+  .cafebox::before{content:"☕"}
+  .ficon.cafe{background:#f3e3d0}
+  .fsub{font-size:12px;font-weight:600;color:#9a6b3c;margin:6px 2px 0}
+  footer{text-align:center;color:var(--muted);font-size:12px;margin-top:30px}
+
+  /* big map overlay */
+  .overlay{position:fixed;inset:0;background:rgba(20,30,45,.92);z-index:50;display:none;flex-direction:column}
+  .overlay.open{display:flex}
+  .ovbar{display:flex;align-items:center;gap:8px;padding:10px 12px;color:#fff}
+  .ovbar b{flex:1;font-size:15px}
+  .ovbar button{font:inherit;font-size:18px;font-weight:700;width:40px;height:40px;border-radius:12px;border:none;background:rgba(255,255,255,.15);color:#fff;cursor:pointer}
+  .ovbar button.close{background:#fff;color:var(--ink)}
+  .ovscroll{flex:1;overflow:auto;-webkit-overflow-scrolling:touch;padding:8px}
+  .ovscroll .inner{margin:0 auto;border-radius:14px;overflow:hidden;background:#8fd3f4}
+  .ovscroll svg{width:100%;height:auto;display:block}
+  .ovhint{color:rgba(255,255,255,.7);font-size:12px;text-align:center;padding:6px 0 12px}
+</style>
+</head>
+<body>
+<header>
+  <div class="kicker">Roadmap · 10–13 ธ.ค.</div>
+  <h1>Hong Kong</h1>
+  <p>ทริป 4 วัน 3 คืน · เส้นทาง วิธีเดินทาง และร้านอร่อย 🚋🏰🙏</p>
+</header>
+
+<div class="wrap">
+
+  <a class="hotel" href="https://www.google.com/maps/search/?api=1&query=Joyce+House+Tsim+Sha+Tsui+Haiphong+Road&query_place_id=ChIJESK-je0ABDQROS7ARJRBDq4" target="_blank" rel="noopener">
+    <div class="hicon">🏨</div>
+    <div class="hinfo">
+      <small>ที่พัก · 10–13 ธ.ค. (3 คืน)</small>
+      <b>Joyce House (Tsim Sha Tsui)</b>
+      <span>香港雅舍 (尖沙咀) · ตึก Haiphong Mansion 53–55 Haiphong Rd ชั้น 5 · ใกล้ MTR Tsim Sha Tsui</span>
+    </div>
+    <div class="go">Maps <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M9 7h8v8"/></svg></div>
+  </a>
+
+  <nav class="daytabs" id="daytabs">
+    <a href="#day1" data-day="day1" class="on"><b>Day 1</b><span>พฤ. 10 ธ.ค.</span></a>
+    <a href="#day2" data-day="day2"><b>Day 2</b><span>ศ. 11 · ดิสนีย์</span></a>
+    <a href="#day3" data-day="day3"><b>Day 3</b><span>ส. 12 · ไหว้พระ</span></a>
+  </nav>
+
+  <section class="day" id="day1">
+  <div class="dayhead"><span class="dchip">Day 1 · พฤ. 10 ธ.ค.</span><h2>📸 Kennedy Town → Central → West Kowloon</h2><p>เดินถ่ายรูป นั่งรถราง แล้วนั่งเรือข้ามไปชิลตอนเย็น</p></div>
+  <div class="mapcard">
+    <div class="mapbox js-big" title="กดเพื่อดูแผนที่ใหญ่">
+<svg class="cmap" viewBox="0 0 800 560" xmlns="http://www.w3.org/2000/svg" font-family="Mali, Prompt, sans-serif">
+  <defs>
+    <pattern id="waves" width="60" height="26" patternUnits="userSpaceOnUse">
+      <path d="M4 14 q8 -7 16 0 t16 0" fill="none" stroke="#ffffff" stroke-opacity=".45" stroke-width="2" stroke-linecap="round"/>
+    </pattern>
+    <filter id="sh" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="2" stdDeviation="2" flood-opacity=".25"/></filter>
+    <style>
+      .lbl{font-size:15px;font-weight:700;fill:#2b2622;paint-order:stroke;stroke:#fff;stroke-width:5px;stroke-linejoin:round}
+      .sm{font-size:12px;font-weight:500;fill:#5b5148;paint-order:stroke;stroke:#fff;stroke-width:4px;stroke-linejoin:round}
+      .area{font-size:20px;font-weight:700;letter-spacing:3px;fill:#b98a3a;opacity:.75}
+      .sea{font-size:18px;font-weight:700;letter-spacing:4px;fill:#ffffff;opacity:.85;font-style:italic}
+      .num{font-size:15px;font-weight:700;fill:#fff;text-anchor:middle;dominant-baseline:central;font-family:Prompt,sans-serif}
+      .tag{font-size:13px;font-weight:700;fill:#fff;text-anchor:middle;dominant-baseline:central}
+    </style>
+  </defs>
+
+  <rect width="800" height="560" fill="#8fd3f4"/>
+  <rect width="800" height="560" fill="url(#waves)"/>
+
+  <g transform="translate(70,70)">
+    <g stroke="#ffc83d" stroke-width="5" stroke-linecap="round">
+      <line x1="0" y1="-48" x2="0" y2="-36"/><line x1="0" y1="48" x2="0" y2="36"/>
+      <line x1="-48" y1="0" x2="-36" y2="0"/><line x1="48" y1="0" x2="36" y2="0"/>
+      <line x1="-34" y1="-34" x2="-25" y2="-25"/><line x1="34" y1="34" x2="25" y2="25"/>
+      <line x1="-34" y1="34" x2="-25" y2="25"/><line x1="34" y1="-34" x2="25" y2="-25"/>
+    </g>
+    <circle r="27" fill="#ffd54f" stroke="#f5b50f" stroke-width="3"/>
+    <circle cx="-9" cy="-4" r="3" fill="#7a4b00"/><circle cx="9" cy="-4" r="3" fill="#7a4b00"/>
+    <path d="M-9 8 q9 8 18 0" stroke="#7a4b00" stroke-width="3" fill="none" stroke-linecap="round"/>
+  </g>
+  <g fill="#fff" opacity=".95">
+    <g transform="translate(250,60)"><ellipse rx="40" ry="16"/><ellipse cx="-22" cy="4" rx="22" ry="13"/><ellipse cx="18" cy="-8" rx="22" ry="15"/></g>
+    <g transform="translate(380,110) scale(.75)"><ellipse rx="40" ry="16"/><ellipse cx="-22" cy="4" rx="22" ry="13"/><ellipse cx="18" cy="-8" rx="22" ry="15"/></g>
+  </g>
+
+  <path d="M440,0 L800,0 L800,228 C760,236 720,222 690,228 C650,236 610,226 570,222 C525,216 480,196 462,150 C448,110 440,60 440,0Z" fill="#ffe9b8" stroke="#e0b866" stroke-width="3"/>
+  <path d="M520,200 C540,170 600,160 660,170 C690,176 700,196 690,214 C650,222 600,220 560,214 C540,212 525,208 520,200Z" fill="#9bd77a" stroke="#6fb553" stroke-width="2"/>
+  <g fill="#4f9a3a"><circle cx="545" cy="192" r="7"/><circle cx="560" cy="182" r="6"/><circle cx="675" cy="190" r="7"/><circle cx="660" cy="180" r="5"/></g>
+  <g stroke="#7d8fa3" stroke-width="2">
+    <rect x="712" y="88" width="34" height="110" rx="4" fill="#cfe0f0"/>
+    <rect x="752" y="120" width="30" height="80" rx="4" fill="#e4eef7"/>
+    <rect x="690" y="140" width="22" height="60" rx="3" fill="#e4eef7"/>
+  </g>
+  <g fill="#ffd54f"><rect x="720" y="100" width="6" height="8"/><rect x="732" y="100" width="6" height="8"/><rect x="720" y="120" width="6" height="8"/><rect x="732" y="140" width="6" height="8"/><rect x="760" y="134" width="6" height="8"/><rect x="760" y="160" width="6" height="8"/></g>
+  <text x="590" y="62" class="area">KOWLOON</text>
+
+  <path d="M0,330 C60,322 120,344 210,350 C300,356 390,352 470,350 C540,348 600,336 680,338 C730,340 770,328 800,322 L800,560 L0,560Z" fill="#ffe9b8" stroke="#e0b866" stroke-width="3"/>
+  <path d="M0,560 C70,478 150,472 230,545 C300,478 380,468 450,535 C520,470 610,486 670,548 C720,505 780,500 800,516 L800,560Z" fill="#a8dd8b" stroke="#7cc160" stroke-width="2"/>
+  <g fill="#6fb553"><circle cx="120" cy="520" r="8"/><circle cx="140" cy="512" r="6"/><circle cx="380" cy="512" r="8"/><circle cx="560" cy="518" r="7"/><circle cx="580" cy="508" r="6"/></g>
+  <g transform="translate(66,0)">
+  <g stroke="#7d8fa3" stroke-width="2">
+    <rect x="618" y="262" width="26" height="80" rx="3" fill="#e4eef7"/>
+    <path d="M650,342 L650,232 L664,212 L678,232 L678,342Z" fill="#cfe0f0"/>
+    <rect x="684" y="276" width="30" height="64" rx="3" fill="#e4eef7"/>
+    <rect x="720" y="256" width="24" height="84" rx="3" fill="#cfe0f0"/>
+  </g>
+  <g fill="#ffd54f"><rect x="625" y="275" width="5" height="7"/><rect x="634" y="295" width="5" height="7"/><rect x="657" y="245" width="5" height="7"/><rect x="667" y="265" width="5" height="7"/><rect x="691" y="290" width="5" height="7"/><rect x="727" y="270" width="5" height="7"/></g>
+  </g>
+  <text x="40" y="540" class="area" font-size="16">HONG KONG ISLAND</text>
+  <text x="110" y="232" class="sea">VICTORIA HARBOUR</text>
+
+  <!-- MTR hotel -> Admiralty -> Kennedy Town -->
+  <path d="M735,222 C760,262 790,300 790,350" fill="none" stroke="#e2231a" stroke-width="6" stroke-dasharray="12 6" stroke-linecap="round"/>
+  <path d="M790,352 C790,440 772,505 700,512 L250,515 C205,516 182,492 176,462" fill="none" stroke="#0075c2" stroke-width="6" stroke-dasharray="12 6" stroke-linecap="round"/>
+  <circle cx="790" cy="352" r="7" fill="#fff" stroke="#555" stroke-width="3"/>
+  <text x="780" y="385" class="sm" text-anchor="end">Admiralty · เปลี่ยนสาย</text>
+  <g transform="translate(560,515)"><rect x="-92" y="-14" width="184" height="28" rx="14" fill="#0075c2"/><text class="tag">🚇 MTR ไป Kennedy Town</text></g>
+  <!-- walk back to hotel -->
+  <path d="M628,200 C660,215 695,222 722,222" fill="none" stroke="#e07a1f" stroke-width="4" stroke-dasharray="2 9" stroke-linecap="round"/>
+  <path d="M175,445 L110,448 L72,405 L112,370 L188,362" fill="none" stroke="#c8102e" stroke-width="4" stroke-dasharray="2 9" stroke-linecap="round"/>
+  <path d="M188,362 C210,370 225,385 232,398" fill="none" stroke="#c8102e" stroke-width="4" stroke-dasharray="2 9" stroke-linecap="round"/>
+
+  <path d="M232,398 C330,395 440,392 560,390" fill="none" stroke="#8b6b4a" stroke-width="7" stroke-linecap="round"/>
+  <path d="M232,398 C330,395 440,392 560,390" fill="none" stroke="#ffe9b8" stroke-width="2.5" stroke-dasharray="6 6"/>
+  <circle cx="232" cy="398" r="7" fill="#fff" stroke="#2e7d5b" stroke-width="3"/>
+  <circle cx="560" cy="390" r="7" fill="#fff" stroke="#2e7d5b" stroke-width="3"/>
+  <text x="236" y="425" class="sm">ป้ายรถราง Kennedy Town</text>
+  <text x="470" y="373" class="sm">ป้ายรถราง Central</text>
+
+  <g transform="translate(372,360)" filter="url(#sh)">
+    <rect x="-34" y="-30" width="68" height="56" rx="8" fill="#2e9a5e" stroke="#1d6b40" stroke-width="2.5"/>
+    <rect x="-38" y="-34" width="76" height="8" rx="4" fill="#1d6b40"/>
+    <g fill="#e6f7ff" stroke="#1d6b40" stroke-width="1.5">
+      <rect x="-27" y="-20" width="14" height="12" rx="2"/><rect x="-7" y="-20" width="14" height="12" rx="2"/><rect x="13" y="-20" width="14" height="12" rx="2"/>
+      <rect x="-27" y="2" width="14" height="12" rx="2"/><rect x="-7" y="2" width="14" height="12" rx="2"/><rect x="13" y="2" width="14" height="12" rx="2"/>
+    </g>
+    <rect x="-34" y="-4" width="68" height="4" fill="#ffd54f"/>
+    <circle cx="-20" cy="30" r="5" fill="#3b2f25"/><circle cx="20" cy="30" r="5" fill="#3b2f25"/>
+    <line x1="0" y1="-34" x2="12" y2="-50" stroke="#3b2f25" stroke-width="2.5"/>
+  </g>
+  <g transform="translate(372,300)">
+    <rect x="-62" y="-14" width="124" height="28" rx="14" fill="#2e7d5b"/>
+    <text class="tag">🚋 นั่งรถราง HK$3.3</text>
+  </g>
+
+  <path d="M560,390 C575,405 585,420 590,445" fill="none" stroke="#2e7d5b" stroke-width="4" stroke-dasharray="2 9" stroke-linecap="round"/>
+  <path d="M590,445 C620,430 635,390 636,346" fill="none" stroke="#2e7d5b" stroke-width="4" stroke-dasharray="2 9" stroke-linecap="round" opacity=".55"/>
+  <rect x="622" y="326" width="26" height="16" rx="3" fill="#b07d4a" stroke="#7d5530" stroke-width="2"/>
+  <text x="650" y="364" class="sm">Central Pier 9</text>
+
+  <path d="M635,326 C645,290 640,250 615,218" fill="none" stroke="#1565c0" stroke-width="4" stroke-dasharray="10 8" stroke-linecap="round"/>
+  <g transform="translate(562,300)" filter="url(#sh)">
+    <path d="M-34,0 L34,0 L26,16 L-26,16Z" fill="#ffffff" stroke="#1565c0" stroke-width="2.5"/>
+    <rect x="-22" y="-16" width="40" height="16" rx="3" fill="#e3f2fd" stroke="#1565c0" stroke-width="2"/>
+    <g fill="#1565c0"><circle cx="-12" cy="-8" r="3"/><circle cx="-1" cy="-8" r="3"/><circle cx="10" cy="-8" r="3"/></g>
+    <rect x="-6" y="-28" width="8" height="12" fill="#c8102e"/>
+  </g>
+  <g transform="translate(470,250)">
+    <rect x="-70" y="-14" width="140" height="28" rx="14" fill="#1565c0"/>
+    <text class="tag">⛴️ WestK Ferry 8 นาที</text>
+  </g>
+
+  <g filter="url(#sh)">
+    <g transform="translate(175,445)"><circle r="16" fill="#c8102e" stroke="#fff" stroke-width="3"/><text class="num">1</text></g>
+    <g transform="translate(110,448)"><circle r="16" fill="#c8102e" stroke="#fff" stroke-width="3"/><text class="num">2</text></g>
+    <g transform="translate(72,405)"><circle r="16" fill="#c8102e" stroke="#fff" stroke-width="3"/><text class="num">3</text></g>
+    <g transform="translate(112,370)"><circle r="16" fill="#c8102e" stroke="#fff" stroke-width="3"/><text class="num">4</text></g>
+    <g transform="translate(188,362)"><circle r="16" fill="#c8102e" stroke="#fff" stroke-width="3"/><text class="num">5</text></g>
+    <g transform="translate(590,445)"><circle r="18" fill="#2e7d5b" stroke="#fff" stroke-width="3"/><text class="num">6</text></g>
+    <g transform="translate(610,196)"><circle r="18" fill="#e07a1f" stroke="#fff" stroke-width="3"/><text class="num">7</text></g>
+  </g>
+
+  <text x="196" y="462" class="lbl" font-size="13">Kennedy Town Stn</text>
+  <text x="196" y="478" class="sm">ทางออก 4 · จุดเริ่ม</text>
+  <text x="110" y="482" class="lbl" font-size="13" text-anchor="middle">🏀 Basketball Court</text>
+  <text x="8" y="440" class="lbl" font-size="13">☕ Winstons</text>
+  <text x="18" y="345" class="lbl" font-size="13">📸 % Arabica</text>
+  <text x="210" y="347" class="lbl" font-size="13">🌊 Waterfront</text>
+  <text x="590" y="482" class="lbl" text-anchor="middle">🎨 Graham Street Wall Art</text>
+  <text x="610" y="152" class="lbl" text-anchor="middle">🌅 West Kowloon Art Park</text>
+  <text x="610" y="246" class="sm" text-anchor="middle">WestK Quay</text>
+
+  <g transform="translate(735,222)" filter="url(#sh)"><path d="M0,-12 C-6,-24 -18,-28 -18,-42 A18,18 0 1 1 18,-42 C18,-28 6,-24 0,-12Z" fill="#c8102e" stroke="#fff" stroke-width="3"/><text x="0" y="-42" font-size="16" text-anchor="middle" dominant-baseline="central">🏨</text></g>
+  <text x="735" y="250" class="lbl" font-size="13" text-anchor="middle">ที่พัก TST</text>
+  <g transform="translate(120,300)">
+    <rect x="-70" y="-15" width="140" height="30" rx="15" fill="#fff" stroke="#c8102e" stroke-width="2.5"/>
+    <text class="tag" style="fill:#c8102e">① ช่วงเช้า · เดินเล่น</text>
+  </g>
+  <g transform="translate(470,450)">
+    <rect x="-70" y="-15" width="140" height="30" rx="15" fill="#fff" stroke="#2e7d5b" stroke-width="2.5"/>
+    <text class="tag" style="fill:#2e7d5b">② ย่าน Central</text>
+  </g>
+  <g transform="translate(560,110)">
+    <rect x="-62" y="-15" width="124" height="30" rx="15" fill="#fff" stroke="#e07a1f" stroke-width="2.5"/>
+    <text class="tag" style="fill:#e07a1f">③ ตอนเย็น</text>
+  </g>
+
+  <g transform="translate(770,42)">
+    <circle r="22" fill="#fff" stroke="#b98a3a" stroke-width="2"/>
+    <path d="M0,-16 L6,0 L0,4 L-6,0Z" fill="#c8102e"/>
+    <path d="M0,16 L6,0 L0,4 L-6,0Z" fill="#b98a3a"/>
+    <text y="-26" class="sm" text-anchor="middle">N</text>
+  </g>
+</svg>
+    </div>
+    <div class="btnrow">
+      <button class="btn ghost js-big" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+        ดูแผนที่ใหญ่
+      </button>
+      <a class="btn primary" href="https://www.google.com/maps/dir/22.298067,114.171913/22.2812467,114.1288825/22.281009,114.126845/22.2813703,114.1270924/22.2836703,114.1266778/22.2850489,114.128935/22.2825005,114.1530396/22.2991007,114.1551603/22.298067,114.171913" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
+        เปิดเส้นทางใน Google Maps
+      </a>
+    </div>
+    <div class="legend">
+      <span><i style="border-color:#0075c2"></i>MTR</span>
+      <span><i style="border-color:#c8102e"></i>เดิน</span>
+      <span><i style="border-color:#8b6b4a;border-top-style:solid"></i>รถราง</span>
+      <span><i style="border-color:#1565c0"></i>เรือเฟอร์รี่</span>
+      <span>* แผนที่การ์ตูน ไม่ได้ตามสเกลจริง</span>
+    </div>
+  </div>
+
+  <div class="road">
+    <div class="how" style="margin-top:0">
+      <h3>🚇 ที่พัก → Kennedy Town</h3>
+      <ol>
+        <li>เดินไป MTR สถานี <b>Tsim Sha Tsui</b></li>
+        <li>นั่ง <b>Tsuen Wan Line (สายแดง)</b> ไปทาง Central แล้วลงที่ <b>Admiralty</b></li>
+        <li>เปลี่ยนเป็น <b>Island Line (สายน้ำเงิน)</b> ไปทาง Kennedy Town แล้วลงที่สถานีสุดสาย <b>Kennedy Town</b></li>
+      </ol>
+      <div class="meta"><span>⏱️ ราว 25–30 นาที</span><span>💳 ใช้ Octopus ได้</span></div>
+    </div>
+
+    <!-- Phase 1 -->
+    <div class="phase" id="p1">
+      <div class="pin c1">1</div>
+      <h2>Kennedy Town</h2>
+      <span class="when c1b">ช่วงเช้า · ทุกจุดเดินถึงกันได้</span>
+    </div>
+
+    <a class="stop" href="https://www.google.com/maps/search/?api=1&query=Kennedy+Town+Station+Exit+4+Hong+Kong" target="_blank" rel="noopener">
+      <div class="icon">🚇<em class="c1">1</em></div>
+      <div class="info"><b>Kennedy Town Station – Exit 4</b><span>MTR สาย Island Line (สีน้ำเงิน) สถานีปลายสาย</span></div>
+      <div class="go">Maps <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M9 7h8v8"/></svg></div>
+    </a>
+    <div class="walk">🚶 เดินไม่กี่นาที</div>
+    <a class="stop" href="https://maps.app.goo.gl/5ppk6n4qYpzEnUPt5" target="_blank" rel="noopener">
+      <div class="icon">🏀<em class="c1">2</em></div>
+      <div class="info"><b>Basketball Court</b><span>มุมดังถ่ายรถรางผ่านห่วงบาส · เปิด 7:00–23:00</span></div>
+      <div class="go">Maps <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M9 7h8v8"/></svg></div>
+    </a>
+    <div class="walk">🚶 เดินใกล้ๆ</div>
+    <a class="stop" href="https://maps.app.goo.gl/8fFrYB5a3fW4ixQb6" target="_blank" rel="noopener">
+      <div class="icon">☕<em class="c1">3</em></div>
+      <div class="info"><b>Winstons Coffee</b><span>คาเฟ่ · เปิด 7 โมงเช้า</span></div>
+      <div class="go">Maps <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M9 7h8v8"/></svg></div>
+    </a>
+    <div class="walk">🚶 เดินลงไปทางทะเล</div>
+    <a class="stop" href="https://maps.app.goo.gl/xaG2ECdAhUYaM5hd6" target="_blank" rel="noopener">
+      <div class="icon">📸<em class="c1">4</em></div>
+      <div class="info"><b>% Arabica</b><span>ร้านกาแฟ % ถ่ายได้หลายจุด · เปิด 8:30</span></div>
+      <div class="go">Maps <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M9 7h8v8"/></svg></div>
+    </a>
+    <div class="walk">🚶 เดินเลียบริมน้ำ</div>
+    <a class="stop" href="https://www.google.com/maps/search/?api=1&query=Belcher+Bay+Promenade+Kennedy+Town+Hong+Kong" target="_blank" rel="noopener">
+      <div class="icon">🌊<em class="c1">5</em></div>
+      <div class="info"><b>Waterfront (ริมน้ำ)</b><span>Belcher Bay Promenade · ทางเดินริมอ่าว</span></div>
+      <div class="go">Maps <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M9 7h8v8"/></svg></div>
+    </a>
+
+    <div class="foodbox">
+      <h3>🍜 ร้านอร่อยแถว Kennedy Town</h3>
+      <a class="food" href="https://www.google.com/maps/search/?api=1&query=Cheung+Heung+Yuen+43+Smithfield+Kennedy+Town&query_place_id=ChIJyQ6gdgD_AzQR3HHAPXwbvGA" target="_blank" rel="noopener">
+        <div class="ficon">🥚</div>
+        <div class="finfo"><b>祥香園 Cheung Heung Yuen</b><span>ชาชานเต็ง สั่งผ่าน QR Code ได้ · ทาร์ตไข่อร่อย</span><div class="ftags"><i>7:00–18:00</i><i>ใกล้สถานี</i></div></div>
+        <div class="fgo">Maps <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M9 7h8v8"/></svg></div>
+      </a>
+      <a class="food" href="https://www.google.com/maps/search/?api=1&query=Chiu+Shun+Kee+Restaurant+Cadogan+St+Kennedy+Town&query_place_id=ChIJ-7JDq5D_AzQR-pf7iDxIG9Y" target="_blank" rel="noopener">
+        <div class="ficon">🍳</div>
+        <div class="finfo"><b>Chiu Shun Kee</b><span>ชาชานเต็งร้านเก่า · ไข่คน ขนมปังเนื้อ ชานม</span><div class="ftags"><i>6:00–18:00</i><i>💵 เงินสดเท่านั้น</i></div></div>
+        <div class="fgo">Maps <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M9 7h8v8"/></svg></div>
+      </a>
+      <a class="food" href="https://www.google.com/maps/search/?api=1&query=Kam+Fat+Restaurant+Belcher%27s+St+Kennedy+Town&query_place_id=ChIJj1tf7Zr_AzQRifhyl7zhU5s" target="_blank" rel="noopener">
+        <div class="ficon">🍜</div>
+        <div class="finfo"><b>Kam Fat Restaurant</b><span>จานใหญ่ ราคาถูก · เช่น ไก่ขิงอุด้ง+ชามะนาว HK$58</span><div class="ftags"><i>เมนูอังกฤษ</i><i>6:00–22:00</i></div></div>
+        <div class="fgo">Maps <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M9 7h8v8"/></svg></div>
+      </a>
+      <a class="food" href="https://www.google.com/maps/search/?api=1&query=Sheung+Hei+25+North+St+Kennedy+Town&query_place_id=ChIJtxQLYJr_AzQRshQq2xbYktE" target="_blank" rel="noopener">
+        <div class="ficon">🥟</div>
+        <div class="finfo"><b>Sheung Hei</b><span>ติ่มซำ + ข้าวหม้อดิน (รอ 30–40 นาที) · แพงกว่านิดหน่อย</span><div class="ftags"><i>เปิด 24 ชม.</i><i>คิวเยอะ</i></div></div>
+        <div class="fgo">Maps <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M9 7h8v8"/></svg></div>
+      </a>
+    </div>
+
+    <div class="how">
+      <h3>🚋 ไป Graham Street ด้วยรถราง</h3>
+      <ol>
+        <li>เดินไปป้ายรถราง Kennedy Town (ต้นสาย)</li>
+        <li>ขึ้นรถรางสายไหนก็ได้ที่วิ่งไปทางตะวันออก ทุกคันผ่าน Central</li>
+        <li>ลงที่ป้าย <b>Des Voeux Road Central (Gilman St)</b> หรือ <b>(Jubilee St)</b></li>
+        <li>เดินขึ้นเนินไปทาง Graham Street ราว 10 นาที</li>
+      </ol>
+      <div class="meta"><span>💰 HK$3.3 ราคาเดียวตลอดสาย</span><span>💳 จ่ายตอนลง (Octopus หรือเหรียญพอดี)</span><span>🚪 ขึ้นประตูหลัง ลงประตูหน้า</span></div>
+    </div>
+
+    <!-- Phase 2 -->
+    <div class="phase" id="p2">
+      <div class="pin c2">2</div>
+      <h2>Central · Graham Street</h2>
+      <span class="when c2b">นั่งรถรางต่อมาแถวนี้</span>
+    </div>
+
+    <a class="stop" href="https://maps.app.goo.gl/bw7SSkexvjAaJW6S9" target="_blank" rel="noopener">
+      <div class="icon">🎨<em class="c2">6</em></div>
+      <div class="info"><b>Graham Street Wall Art</b><span>มีหลายจุดให้ถ่าย</span></div>
+      <div class="go">Maps <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M9 7h8v8"/></svg></div>
+    </a>
+
+    <div class="foodbox cafebox">
+      <h3>☕ คาเฟ่สวยปี 2026 ระหว่างทาง</h3>
+      <p class="fsub">แถว Graham Street (เดินไม่กี่นาที)</p>
+      <a class="food" href="https://www.google.com/maps/search/?api=1&query=Haus+Coffee+Club+32+Staunton+St+Central&query_place_id=ChIJE1-jhG4BBDQRpmUskIC4k7c" target="_blank" rel="noopener">
+        <div class="ficon cafe">🍝</div>
+        <div class="finfo"><b>Haus Coffee Club</b><span>จานสวยถ่ายรูปขึ้น · พาสต้าต้มยำกุ้ง ลาเต้ & มัทฉะ · เหมาะเป็นบรันช์</span><div class="ftags"><i>8:00–18:00</i><i>กินอิ่ม</i></div></div>
+        <div class="fgo">Maps <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M9 7h8v8"/></svg></div>
+      </a>
+      <a class="food" href="https://www.google.com/maps/search/?api=1&query=Artista+Perfetto+23+Hollywood+Road+Central&query_place_id=ChIJacTlQgABBDQRDdvaUVivyRw" target="_blank" rel="noopener">
+        <div class="ficon cafe">☕</div>
+        <div class="finfo"><b>Artista Perfetto</b><span>สาขาใหม่ปี 2026 ร้านจิ๋ว ยืนได้ไม่กี่คน · ลอง "dirty" หรือเอสเปรสโซมะนาวโทนิก</span><div class="ftags"><i>8:00–18:30</i><i>ซื้อถือเดิน</i></div></div>
+        <div class="fgo">Maps <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M9 7h8v8"/></svg></div>
+      </a>
+      <p class="fsub">แถว Sheung Wan (อยู่บนสายรถราง)</p>
+      <a class="food" href="https://www.google.com/maps/search/?api=1&query=Tai+Ping+Coffee+and+Flower+5+Tai+Ping+Shan+St&query_place_id=ChIJKdUyH4YBBDQR-7tbBl4msxI" target="_blank" rel="noopener">
+        <div class="ficon cafe">💐</div>
+        <div class="finfo"><b>Tai Ping 太平 Coffee & Flower</b><span>ร้านกาแฟ + ร้านดอกไม้ เปิดปี 2026 · ดอกไม้เต็มร้าน ถ่ายรูปสวย · เซ็ตกาแฟ+ดอกไม้ HK$88</span><div class="ftags"><i>พฤ. 10:00–18:00 (พัก 11:30–12:30)</i><i>📸 ถ่ายรูปสวย</i></div></div>
+        <div class="fgo">Maps <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M9 7h8v8"/></svg></div>
+      </a>
+      <a class="food" href="https://www.google.com/maps/search/?api=1&query=Mason+Pocket+1+Queen+St+Sheung+Wan&query_place_id=ChIJ7ZviNX4BBDQRW3hv5OXUj4o" target="_blank" rel="noopener">
+        <div class="ficon cafe">🥐</div>
+        <div class="finfo"><b>Mason Pocket</b><span>อยู่ในซูเปอร์มาร์เก็ตเก่า หน้าต่างบานใหญ่ แสงสวย · ขนมอบเอง ทาร์ตไข่ ต๊อกบกกี</span><div class="ftags"><i>8:00–19:30</i><i>📸 ถ่ายรูปสวย</i></div></div>
+        <div class="fgo">Maps <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M9 7h8v8"/></svg></div>
+      </a>
+      <a class="food" href="https://www.google.com/maps/search/?api=1&query=Lazy+Sunday+1+Jervois+St+Sheung+Wan&query_place_id=ChIJDez7VWMBBDQRCfRPnyXXXTI" target="_blank" rel="noopener">
+        <div class="ficon cafe">🍞</div>
+        <div class="finfo"><b>Lazy Sunday</b><span>คาเฟ่สไตล์เกาหลี หน้าร้านสีขาว · ขนมปังซาวโดว์ · ใกล้ MTR Sheung Wan ทางออก E2</span><div class="ftags"><i>8:00–22:00</i></div></div>
+        <div class="fgo">Maps <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M9 7h8v8"/></svg></div>
+      </a>
+    </div>
+
+    <div class="foodbox">
+      <h3>🍜 ร้านอร่อยแถว Central</h3>
+      <a class="food" href="https://www.google.com/maps/search/?api=1&query=Tsim+Chai+Kee+Noodle+98+Wellington+St+Central&query_place_id=ChIJFd-lXXsABDQRSR3-Bz40T3Q" target="_blank" rel="noopener">
+        <div class="ficon">🍤</div>
+        <div class="finfo"><b>Tsim Chai Kee Noodle</b><span>บะหมี่เกี๊ยวกุ้งลูกโต · มิชลินแนะนำ · ราว HK$40</span><div class="ftags"><i>11:00–21:30</i><i>มาก่อน 11 โมง</i></div></div>
+        <div class="fgo">Maps <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M9 7h8v8"/></svg></div>
+      </a>
+      <a class="food" href="https://www.google.com/maps/search/?api=1&query=Lung+Kee+Roasted+Meat+12+Queen+Victoria+St+Central&query_place_id=ChIJ2a-PYB5H_xMRrOp2kq30Tls" target="_blank" rel="noopener">
+        <div class="ficon">🍗</div>
+        <div class="finfo"><b>Lung Kee Roasted Meat</b><span>ข้าวหน้าห่าน หมูกรอบ หมูแดง · พนักงานใจดี</span><div class="ftags"><i>7:00–20:30</i><i>คิวไม่ยาว</i></div></div>
+        <div class="fgo">Maps <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M9 7h8v8"/></svg></div>
+      </a>
+      <a class="food" href="https://www.google.com/maps/search/?api=1&query=Kau+Kee+21+Gough+St+Central&query_place_id=ChIJaRNph3wABDQRZ_67CO39BWs" target="_blank" rel="noopener">
+        <div class="ficon">🥩</div>
+        <div class="finfo"><b>Kau Kee</b><span>ก๋วยเตี๋ยวเนื้อตุ๋นร้านดัง · ใกล้ Graham St · รีวิวแบ่งสองฝั่ง</span><div class="ftags"><i>12:30–22:30</i><i>ปิดวันอาทิตย์</i></div></div>
+        <div class="fgo">Maps <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M9 7h8v8"/></svg></div>
+      </a>
+    </div>
+
+    <div class="how">
+      <h3>⛴️ ไป West Kowloon ตอนเย็น</h3>
+      <ol>
+        <li>เดินจาก Graham St ลงไปที่ <b>Central Pier 9</b> (ท่าเรือริมอ่าว)</li>
+        <li>ขึ้น <b>WestK Ferry</b> ข้ามอ่าว ใช้เวลาราว 8 นาที วิวสวยมาก</li>
+        <li>ลงที่ WestK Quay แล้วเดินเข้า Art Park ได้เลย</li>
+      </ol>
+      <div class="meta"><span>💰 ราว HK$20</span><span>🕗 เรือออกจาก Central 8:00–22:45</span></div>
+      <p class="alt">ทางเลือก MTR: นั่ง Tung Chung Line จาก Hong Kong Station ไป Kowloon Station ออกทาง E4/E5 แล้วเดินราว 10 นาที</p>
+    </div>
+
+    <!-- Phase 3 -->
+    <div class="phase" id="p3">
+      <div class="pin c3">3</div>
+      <h2>West Kowloon</h2>
+      <span class="when c3b">ตอนเย็นมาต่อที่นี่</span>
+    </div>
+
+    <a class="stop" href="https://maps.app.goo.gl/3EupgAhhvidGTtkF6" target="_blank" rel="noopener">
+      <div class="icon">🌅<em class="c3">7</em></div>
+      <div class="info"><b>West Kowloon Art Park</b><span>นั่งชิลตอนเย็น ไม่ไกลที่พักเท่าไหร่ · เปิดถึง 23:00</span></div>
+      <div class="go">Maps <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M9 7h8v8"/></svg></div>
+    </a>
+
+    <div class="foodbox cafebox">
+      <h3>☕ คาเฟ่ใกล้ West Kowloon</h3>
+      <a class="food" href="https://www.google.com/maps/search/?api=1&query=Coffee+Hwajeon+Elements+Austin+Road+West&query_place_id=ChIJBX7kyaIBBDQRlG9wVRCbqZ4" target="_blank" rel="noopener">
+        <div class="ficon cafe">🌸</div>
+        <div class="finfo"><b>Coffee Hwajeon 커피화전</b><span>คาเฟ่เกาหลีธีมดอกไม้ ในห้าง Elements · ครอฟเฟิลชีสเค้ก บิงซู คิมบับ</span><div class="ftags"><i>11:30–22:00</i><i>ค่ำๆ อาจรอคิว</i></div></div>
+        <div class="fgo">Maps <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M9 7h8v8"/></svg></div>
+      </a>
+    </div>
+
+    <div class="foodbox">
+      <h3>🍜 มื้อเย็นที่ West Kowloon</h3>
+      <p class="fnote">🚚 ใน Art Park มีฟู้ดทรักและคาเฟ่ ซื้อของกินแล้วนั่งปิกนิกริมน้ำดูวิวอ่าวได้เลย</p>
+    </div>
+
+    <div class="finish" style="margin-top:24px">
+      <div class="pin">🏁</div>
+      <p>กลับที่พัก TST · เดินราว 20–30 นาที หรือนั่งแท็กซี่</p>
+    </div>
+  </div>
+
+  </section>
+
+  <section class="day" id="day2" hidden>
+  <div class="dayhead"><span class="dchip">Day 2 · ศ. 11 ธ.ค.</span><h2>🏰 Hong Kong Disneyland</h2><p>นั่ง MTR จากที่พักไปดิสนีย์ ต่อรถ 3 สาย ราว 35–40 นาที</p></div>
+
+  <div class="mapcard">
+    <div class="mapbox js-big" title="กดเพื่อดูแผนที่ใหญ่">
+<svg class="cmap" viewBox="0 0 800 470" xmlns="http://www.w3.org/2000/svg" font-family="Mali, Prompt, sans-serif">
+  <defs>
+    <pattern id="waves2" width="60" height="26" patternUnits="userSpaceOnUse"><path d="M4 14 q8 -7 16 0 t16 0" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="2" stroke-linecap="round"/></pattern>
+    <filter id="sh2" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="2" stdDeviation="2" flood-opacity=".25"/></filter>
+    <style>
+      .l2{font-size:15px;font-weight:700;fill:#2b2622;paint-order:stroke;stroke:#fff;stroke-width:5px;stroke-linejoin:round}
+      .s2{font-size:12px;font-weight:500;fill:#5b5148;paint-order:stroke;stroke:#fff;stroke-width:4px;stroke-linejoin:round}
+      .t2{font-size:13px;font-weight:700;fill:#fff;text-anchor:middle;dominant-baseline:central}
+      .a2{font-size:18px;font-weight:700;letter-spacing:3px;fill:#b98a3a;opacity:.75}
+    </style>
+  </defs>
+  <rect width="800" height="470" fill="#8fd3f4"/><rect width="800" height="470" fill="url(#waves2)"/>
+  <!-- Lantau -->
+  <path d="M0,150 C60,130 140,140 220,160 C300,180 360,170 400,200 C420,240 380,300 330,330 C260,380 160,400 80,440 L0,470Z" fill="#ffe9b8" stroke="#e0b866" stroke-width="3"/>
+  <path d="M0,260 C40,190 90,180 130,250 C160,200 200,190 240,250 L240,300 L0,330Z" fill="#a8dd8b" stroke="#7cc160" stroke-width="2"/>
+  <text x="150" y="425" class="a2">LANTAU</text>
+  <!-- Kowloon side -->
+  <path d="M460,0 L800,0 L800,470 L640,470 C620,420 600,380 560,350 C520,320 500,260 480,200 C470,150 470,70 460,0Z" fill="#ffe9b8" stroke="#e0b866" stroke-width="3"/>
+  <path d="M560,0 C600,60 660,70 700,20 C730,70 770,80 800,40 L800,0Z" fill="#a8dd8b" stroke="#7cc160" stroke-width="2"/>
+  <g stroke="#7d8fa3" stroke-width="2"><rect x="690" y="300" width="28" height="70" rx="3" fill="#e4eef7"/><rect x="724" y="280" width="30" height="90" rx="3" fill="#cfe0f0"/><rect x="760" y="310" width="26" height="60" rx="3" fill="#e4eef7"/></g>
+  <text x="660" y="140" class="a2">KOWLOON</text>
+  <!-- fireworks + castle (generic) -->
+  <g transform="translate(110,300)">
+    <g stroke="#ff7eb6" stroke-width="3" stroke-linecap="round"><line x1="-60" y1="-120" x2="-60" y2="-140"/><line x1="-60" y1="-100" x2="-60" y2="-80"/><line x1="-80" y1="-110" x2="-100" y2="-110"/><line x1="-40" y1="-110" x2="-20" y2="-110"/><line x1="-74" y1="-124" x2="-88" y2="-138"/><line x1="-46" y1="-96" x2="-32" y2="-82"/><line x1="-46" y1="-124" x2="-32" y2="-138"/><line x1="-74" y1="-96" x2="-88" y2="-82"/></g>
+    <g stroke="#ffd54f" stroke-width="3" stroke-linecap="round"><line x1="60" y1="-140" x2="60" y2="-156"/><line x1="60" y1="-124" x2="60" y2="-108"/><line x1="44" y1="-132" x2="28" y2="-132"/><line x1="76" y1="-132" x2="92" y2="-132"/><line x1="49" y1="-143" x2="38" y2="-154"/><line x1="71" y1="-121" x2="82" y2="-110"/><line x1="71" y1="-143" x2="82" y2="-154"/><line x1="49" y1="-121" x2="38" y2="-110"/></g>
+    <g filter="url(#sh2)">
+      <rect x="-40" y="-40" width="80" height="50" fill="#f3e5ff" stroke="#8e6bbf" stroke-width="2.5"/>
+      <rect x="-56" y="-62" width="22" height="72" fill="#e9d6ff" stroke="#8e6bbf" stroke-width="2.5"/>
+      <rect x="34" y="-62" width="22" height="72" fill="#e9d6ff" stroke="#8e6bbf" stroke-width="2.5"/>
+      <rect x="-14" y="-80" width="28" height="44" fill="#e9d6ff" stroke="#8e6bbf" stroke-width="2.5"/>
+      <path d="M-60,-62 L-45,-88 L-30,-62Z M30,-62 L45,-88 L60,-62Z M-18,-80 L0,-112 L18,-80Z" fill="#5b8def" stroke="#3b63b8" stroke-width="2"/>
+      <path d="M-12,10 L-12,-12 Q0,-24 12,-12 L12,10Z" fill="#8e6bbf"/>
+    </g>
+  </g>
+  <!-- Lines -->
+  <path d="M705,250 C640,250 590,220 560,175" fill="none" stroke="#e2231a" stroke-width="8" stroke-linecap="round"/>
+  <path d="M560,175 C480,170 400,170 330,190" fill="none" stroke="#f38b00" stroke-width="8" stroke-linecap="round"/>
+  <path d="M330,190 C280,215 230,250 190,285" fill="none" stroke="#f550a6" stroke-width="8" stroke-linecap="round"/>
+  <!-- stations -->
+  <g filter="url(#sh2)">
+    <circle cx="705" cy="250" r="11" fill="#fff" stroke="#e2231a" stroke-width="4"/>
+    <circle cx="560" cy="175" r="11" fill="#fff" stroke="#555" stroke-width="4"/>
+    <circle cx="330" cy="190" r="11" fill="#fff" stroke="#555" stroke-width="4"/>
+    <circle cx="190" cy="285" r="11" fill="#fff" stroke="#f550a6" stroke-width="4"/>
+  </g>
+  <!-- hotel pin -->
+  <g transform="translate(705,250)" filter="url(#sh2)"><path d="M0,-14 C-6,-26 -20,-30 -20,-46 A20,20 0 1 1 20,-46 C20,-30 6,-26 0,-14Z" fill="#c8102e" stroke="#fff" stroke-width="3"/><text x="0" y="-46" font-size="18" text-anchor="middle" dominant-baseline="central">🏨</text></g>
+  <text x="705" y="282" class="l2" text-anchor="middle">ที่พัก · TST</text>
+  <text x="705" y="300" class="s2" text-anchor="middle">Joyce House</text>
+  <text x="560" y="150" class="l2" text-anchor="middle">Lai King</text>
+  <text x="540" y="205" class="s2" text-anchor="end">เปลี่ยนสาย ①</text>
+  <text x="330" y="166" class="l2" text-anchor="middle">Sunny Bay</text>
+  <text x="330" y="225" class="s2" text-anchor="middle">เปลี่ยนสาย ②</text>
+  <text x="190" y="320" class="l2" text-anchor="middle">Disneyland Resort</text>
+  <!-- chips -->
+  <g transform="translate(590,335)"><rect x="-70" y="-14" width="140" height="28" rx="14" fill="#e2231a"/><text class="t2">🚇 Tsuen Wan Line</text></g>
+  <g transform="translate(445,140)"><rect x="-72" y="-14" width="144" height="28" rx="14" fill="#f38b00"/><text class="t2">🚇 Tung Chung Line</text></g>
+  <g transform="translate(300,275)"><rect x="-58" y="-14" width="116" height="28" rx="14" fill="#f550a6"/><text class="t2">🚝 Disney Line</text></g>
+  <g transform="translate(560,410)"><rect x="-110" y="-17" width="220" height="34" rx="17" fill="#fff" stroke="#c8102e" stroke-width="2.5"/><text class="t2" style="fill:#c8102e">⏱️ รวม ~35–40 นาที · ~HK$25</text></g>
+</svg>
+    </div>
+    <div class="btnrow">
+      <button class="btn ghost js-big" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>ดูแผนที่ใหญ่</button>
+      <a class="btn primary" href="https://www.google.com/maps/dir/?api=1&origin=22.298067,114.171913&destination=Hong+Kong+Disneyland&destination_place_id=ChIJPZXTUy_8AzQRBVRH5GyvszU&travelmode=transit" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>เปิดเส้นทางใน Google Maps</a>
+    </div>
+    <div class="legend"><span><i style="border-color:#e2231a;border-top-style:solid"></i>สายแดง</span><span><i style="border-color:#f38b00;border-top-style:solid"></i>สายส้ม</span><span><i style="border-color:#f550a6;border-top-style:solid"></i>สายชมพู</span><span>* แผนที่การ์ตูน ไม่ได้ตามสเกลจริง</span></div>
+  </div>
+
+  <div class="road">
+    <div class="phase"><div class="pin c1">🌅</div><h2>มื้อเช้าใกล้ที่พัก</h2><span class="when c1b">กินให้อิ่มก่อนออก</span></div>
+    <div class="foodbox">
+      <h3>🍜 ร้านเช้าแถว TST (เดินจากที่พักได้)</h3>
+      <a class="food" href="https://www.google.com/maps/search/?api=1&query=Hop+Hing+Noodle+Restaurant+5A+Humphreys+Ave&query_place_id=ChIJnxA1UxEBBDQRHL8_AB6I9TE" target="_blank" rel="noopener">
+        <div class="ficon">🥣</div>
+        <div class="finfo"><b>Hop Hing Noodle 合興粉麵茶餐廳</b><span>โจ๊ก บะหมี่เกี๊ยว ข้าวผ้าขี้ริ้ว · ร้านสะอาด จานใหญ่ ราว HK$40–80</span><div class="ftags"><i>7:30–23:00</i><i>ใกล้ที่พัก</i></div></div>
+        <div class="fgo">Maps <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M9 7h8v8"/></svg></div>
+      </a>
+      <a class="food" href="https://www.google.com/maps/search/?api=1&query=Mon+Kee+Cafe+29-39+Ashley+Rd+Tsim+Sha+Tsui&query_place_id=ChIJ_cRDdlwABDQRPhA1dFgwDbA" target="_blank" rel="noopener">
+        <div class="ficon">🍳</div>
+        <div class="finfo"><b>Mon Kee Cafe</b><span>ข้าวหน้าไข่นุ่มกับหมูแดง ชานมเข้มข้น · สั่งผ่านมือถือได้ (มีไวไฟ)</span><div class="ftags"><i>7:30–22:00</i></div></div>
+        <div class="fgo">Maps <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M9 7h8v8"/></svg></div>
+      </a>
+
+    </div>
+
+    <div class="how">
+      <h3>🚇 ไปดิสนีย์ด้วย MTR</h3>
+      <ol>
+        <li>เข้า MTR สถานี <b>Tsim Sha Tsui</b> (อยู่ใกล้ที่พักมาก)</li>
+        <li>นั่ง <b>Tsuen Wan Line (สายแดง)</b> ไปทาง Tsuen Wan แล้วลงที่ <b>Lai King</b></li>
+        <li>เปลี่ยนเป็น <b>Tung Chung Line (สายส้ม)</b> ไปทาง Tung Chung แล้วลงที่ <b>Sunny Bay</b></li>
+        <li>เปลี่ยนเป็น <b>Disneyland Resort Line (สายชมพู)</b> นั่งแค่ป้ายเดียวก็ถึง</li>
+      </ol>
+      <div class="meta"><span>⏱️ ~35–40 นาที</span><span>💳 ใช้ Octopus ได้</span><span>🔁 Lai King เปลี่ยนชานชาลาฝั่งตรงข้าม</span></div>
+    </div>
+
+    <div class="phase"><div class="pin c3">🏰</div><h2>Hong Kong Disneyland</h2><span class="when c3b">เที่ยวทั้งวัน · ช่วงคริสต์มาส</span></div>
+    <a class="stop" href="https://www.google.com/maps/search/?api=1&query=Hong+Kong+Disneyland&query_place_id=ChIJPZXTUy_8AzQRBVRH5GyvszU" target="_blank" rel="noopener">
+      <div class="icon">🎢</div>
+      <div class="info"><b>Hong Kong Disneyland</b><span>วันศุกร์ปกติเปิด 10:30–20:00 · ช่วงนี้มีงานคริสต์มาส (20 พ.ย. – 3 ม.ค.)</span></div>
+      <div class="go">Maps <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M9 7h8v8"/></svg></div>
+    </a>
+    <div class="walk">⚠️ เวลาเปิด–ปิดเปลี่ยนตามวัน เช็กในแอป Hong Kong Disneyland ก่อนไป</div>
+
+    <div class="foodbox">
+      <h3>🍛 กินอะไรในดิสนีย์ (ราคาในสวนสนุกจะแพงกว่าข้างนอก)</h3>
+      <a class="food" href="https://www.google.com/maps/search/?api=1&query=Wayfinders+Table+Hong+Kong+Disneyland&query_place_id=ChIJWSGODyz8AzQR5bHWD5RPQcI" target="_blank" rel="noopener">
+        <div class="ficon">🍛</div>
+        <div class="finfo"><b>Wayfinders' Table</b><span>ร้านธีมโมอาน่า · มีลักซา แกงมัสมั่นกุ้ง หมี่โกเร็ง · น้ำปั่นสับปะรดอร่อย · มีฮาลาล</span><div class="ftags"><i>11:00–20:30</i><i>คนไทยกินง่าย</i></div></div>
+        <div class="fgo">Maps <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M9 7h8v8"/></svg></div>
+      </a>
+      <a class="food" href="https://www.google.com/maps/search/?api=1&query=Comet+Cafe+Hong+Kong+Disneyland&query_place_id=ChIJxfhJQy_8AzQRIdNv0uBGrAY" target="_blank" rel="noopener">
+        <div class="ficon">🍜</div>
+        <div class="finfo"><b>Comet Cafe</b><span>ข้าวแกงกะหรี่ญี่ปุ่น อุด้ง เบอร์เกอร์กุ้ง · จานใหญ่ สั่งผ่านแอปได้ ได้ของไว</span><div class="ftags"><i>11:30–20:30</i></div></div>
+        <div class="fgo">Maps <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M9 7h8v8"/></svg></div>
+      </a>
+      <a class="food" href="https://www.google.com/maps/search/?api=1&query=Plaza+Inn+Hong+Kong+Disneyland&query_place_id=ChIJEyF_tyj8AzQRjZgsIqHe5fU" target="_blank" rel="noopener">
+        <div class="ficon">🥟</div>
+        <div class="finfo"><b>Plaza Inn</b><span>ติ่มซำ ซาลาเปารูปตัวการ์ตูน · นั่งพักในร้านเงียบๆ ได้ · แพงกว่าร้านอื่น</span><div class="ftags"><i>10:30–20:45</i></div></div>
+        <div class="fgo">Maps <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M9 7h8v8"/></svg></div>
+      </a>
+
+    </div>
+
+    <div class="how">
+      <h3>🌙 ขากลับที่พัก</h3>
+      <ol>
+        <li>นั่ง Disneyland Resort Line กลับไป Sunny Bay</li>
+        <li>เปลี่ยนเป็น Tung Chung Line ไปทาง Hong Kong แล้วลงที่ Lai King</li>
+        <li>เปลี่ยนเป็น Tsuen Wan Line ไปทาง Central แล้วลงที่ Tsim Sha Tsui</li>
+      </ol>
+      <p class="alt">ดูโชว์ปิดสวนเสร็จคนจะเยอะมาก เผื่อเวลารอรถไฟด้วย</p>
+    </div>
+
+    <div class="foodbox">
+      <h3>🌃 มื้อดึกใกล้ที่พัก (เปิดถึงห้าทุ่ม)</h3>
+      <a class="food" href="https://www.google.com/maps/search/?api=1&query=Hop+Hing+Noodle+Restaurant+5A+Humphreys+Ave&query_place_id=ChIJnxA1UxEBBDQRHL8_AB6I9TE" target="_blank" rel="noopener">
+        <div class="ficon">🍜</div>
+        <div class="finfo"><b>Hop Hing Noodle</b><span>บะหมี่เกี๊ยว ข้าวเนื้อ · ร้านเดียวกับมื้อเช้า เปิดดึก</span><div class="ftags"><i>ถึง 23:00</i></div></div>
+        <div class="fgo">Maps <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M9 7h8v8"/></svg></div>
+      </a>
+      <a class="food" href="https://www.google.com/maps/search/?api=1&query=HongKongHungHingLong+Chinese+Restaurant+10+Humphreys+Ave&query_place_id=ChIJxeRgVoEBBDQRoNaZINg441o" target="_blank" rel="noopener">
+        <div class="ficon">🍚</div>
+        <div class="finfo"><b>Hung Hing Long</b><span>ข้าวหน้าหมู เกี๊ยวกุ้งทอด ปีกไก่ทอดกรอบ · มีเมนูอังกฤษ/รูป</span><div class="ftags"><i>ถึง 23:00</i><i>ปิดวันอังคาร</i></div></div>
+        <div class="fgo">Maps <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M9 7h8v8"/></svg></div>
+      </a>
+      <a class="food" href="https://www.google.com/maps/search/?api=1&query=Wing+Nin+Noodle+46+Carnarvon+Rd&query_place_id=ChIJ9TiALuwABDQRbwZQinZLwHY" target="_blank" rel="noopener">
+        <div class="ficon">🍲</div>
+        <div class="finfo"><b>Wing Nin Noodle</b><span>ก๋วยเตี๋ยวรถเข็น เลือกท็อปปิ้งเอง เริ่ม HK$38 · สั่งผ่าน QR</span><div class="ftags"><i>ถึง 23:00</i><i>คนเยอะช่วงค่ำ</i></div></div>
+        <div class="fgo">Maps <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M9 7h8v8"/></svg></div>
+      </a>
+
+    </div>
+
+    <div class="finish" style="margin-top:24px"><div class="pin">🏁</div><p>กลับที่พัก พักผ่อน</p></div>
+  </div>
+  </section>
+
+  <section class="day" id="day3" hidden>
+  <div class="dayhead"><span class="dchip">Day 3 · ส. 12 ธ.ค.</span><h2>🙏 ไหว้พระ 4 วัด</h2><p>แชกง → หวังต้าเซียน → กวนอิมฮองฮำ → รีพัลส์เบย์</p></div>
+  <div class="tourbox">🚐 ถ้าไปกับทัวร์ HKB ทัวร์จะพาไปเอง ส่วนนี้ใช้ดูภาพรวมได้ ถ้าไปเองให้ทำตามขั้นตอนนั่ง MTR / รถบัสด้านล่าง</div>
+
+  <div class="mapcard">
+    <div class="mapbox js-big" title="กดเพื่อดูแผนที่ใหญ่">
+<svg class="cmap" viewBox="0 0 800 620" xmlns="http://www.w3.org/2000/svg" font-family="Mali, Prompt, sans-serif">
+  <defs>
+    <pattern id="waves3" width="60" height="26" patternUnits="userSpaceOnUse"><path d="M4 14 q8 -7 16 0 t16 0" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="2" stroke-linecap="round"/></pattern>
+    <filter id="sh3" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="2" stdDeviation="2" flood-opacity=".25"/></filter>
+    <symbol id="temple" viewBox="-30 -30 60 60">
+      <path d="M-26,-6 L0,-24 L26,-6Z" fill="#c8102e" stroke="#8a0a1f" stroke-width="2"/>
+      <rect x="-20" y="-6" width="40" height="6" fill="#ffd54f" stroke="#b9871a" stroke-width="1.5"/>
+      <rect x="-16" y="0" width="32" height="20" fill="#ffe3a3" stroke="#b9871a" stroke-width="1.5"/>
+      <rect x="-5" y="6" width="10" height="14" fill="#c8102e"/>
+    </symbol>
+    <style>
+      .l3{font-size:15px;font-weight:700;fill:#2b2622;paint-order:stroke;stroke:#fff;stroke-width:5px;stroke-linejoin:round}
+      .s3{font-size:12px;font-weight:500;fill:#5b5148;paint-order:stroke;stroke:#fff;stroke-width:4px;stroke-linejoin:round}
+      .t3{font-size:12.5px;font-weight:700;fill:#fff;text-anchor:middle;dominant-baseline:central}
+      .a3{font-size:17px;font-weight:700;letter-spacing:3px;fill:#b98a3a;opacity:.75}
+      .n3{font-size:15px;font-weight:700;fill:#fff;text-anchor:middle;dominant-baseline:central;font-family:Prompt,sans-serif}
+    </style>
+  </defs>
+  <rect width="800" height="620" fill="#8fd3f4"/><rect width="800" height="620" fill="url(#waves3)"/>
+  <!-- New Territories + Kowloon -->
+  <path d="M0,0 L800,0 L800,330 C740,345 690,330 640,338 C580,348 520,330 470,342 C420,352 360,336 300,346 C240,356 180,340 120,350 C80,356 40,345 0,350Z" fill="#ffe9b8" stroke="#e0b866" stroke-width="3"/>
+  <path d="M0,0 L800,0 L800,150 C740,190 680,160 630,180 C560,200 500,150 440,175 C380,200 320,160 260,180 C200,200 120,160 0,185Z" fill="#a8dd8b" stroke="#7cc160" stroke-width="2"/>
+  <g fill="#6fb553"><circle cx="90" cy="120" r="9"/><circle cx="110" cy="110" r="7"/><circle cx="660" cy="110" r="9"/><circle cx="680" cy="122" r="7"/></g>
+  <text x="560" y="40" class="a3">SHA TIN</text>
+  <text x="40" y="250" class="a3">KOWLOON</text>
+  <!-- HK Island -->
+  <path d="M0,410 C80,398 160,412 240,404 C320,396 400,410 480,402 C560,394 640,408 720,400 C760,396 780,402 800,400 L800,520 C760,540 700,530 650,548 C600,566 560,560 520,556 C470,552 420,566 380,575 C320,588 240,580 160,590 C100,598 40,590 0,596Z" fill="#ffe9b8" stroke="#e0b866" stroke-width="3"/>
+  <path d="M60,560 C120,470 200,460 260,540 C320,470 400,460 450,530 C520,470 600,470 660,530 L660,548 C600,566 560,560 520,556 C470,552 420,566 380,575 C320,588 240,580 160,590 C100,598 60,592 60,592Z" fill="#a8dd8b" stroke="#7cc160" stroke-width="2"/>
+  <text x="40" y="440" class="a3" font-size="15">HONG KONG ISLAND</text>
+  <text x="560" y="375" class="a3" style="fill:#fff;opacity:.85;font-style:italic">VICTORIA HARBOUR</text>
+  <!-- beach -->
+  <path d="M440,560 C470,548 520,548 560,557 L556,566 C520,560 470,560 444,570Z" fill="#fff3c4" stroke="#e8c96a" stroke-width="1.5"/>
+  <!-- buildings Kowloon -->
+  <g stroke="#7d8fa3" stroke-width="2"><rect x="170" y="270" width="24" height="56" rx="3" fill="#e4eef7"/><rect x="198" y="252" width="28" height="74" rx="3" fill="#cfe0f0"/></g>
+
+  <!-- ROUTES -->
+  <!-- 1: Tuen Ma (brown) hotel -> Che Kung -->
+  <path d="M330,318 C360,290 380,240 395,200 C405,170 412,140 420,112" fill="none" stroke="#9a3820" stroke-width="7" stroke-linecap="round"/>
+  <!-- 2: Che Kung -> Diamond Hill (Tuen Ma) -> Wong Tai Sin (green) -->
+  <path d="M420,112 C470,130 520,160 575,205" fill="none" stroke="#9a3820" stroke-width="7" stroke-linecap="round"/>
+  <path d="M575,205 C555,215 535,220 515,222" fill="none" stroke="#00a040" stroke-width="7" stroke-linecap="round"/>
+  <!-- 3: Wong Tai Sin -> Whampoa (green Kwun Tong line) -->
+  <path d="M515,222 C470,240 470,270 520,300" fill="none" stroke="#00a040" stroke-width="7" stroke-linecap="round"/>
+  <path d="M520,300 C510,304 500,306 488,306" fill="none" stroke="#c8102e" stroke-width="4" stroke-dasharray="2 8" stroke-linecap="round"/>
+  <!-- 4: Hung Hom -> Admiralty (East Rail light blue) -->
+  <path d="M470,318 C460,350 440,390 420,428" fill="none" stroke="#5eb6e4" stroke-width="7" stroke-linecap="round"/>
+  <!-- bus Admiralty -> Repulse Bay -->
+  <path d="M420,428 C450,460 470,500 495,548" fill="none" stroke="#e07a1f" stroke-width="5" stroke-dasharray="10 7" stroke-linecap="round"/>
+
+  <!-- stations -->
+  <g filter="url(#sh3)">
+    <circle cx="575" cy="205" r="7" fill="#fff" stroke="#555" stroke-width="3"/>
+    <circle cx="520" cy="300" r="7" fill="#fff" stroke="#00a040" stroke-width="3"/>
+    <circle cx="470" cy="318" r="7" fill="#fff" stroke="#5eb6e4" stroke-width="3"/>
+    <circle cx="420" cy="428" r="7" fill="#fff" stroke="#5eb6e4" stroke-width="3"/>
+  </g>
+  <text x="590" y="200" class="s3">Diamond Hill · เปลี่ยนสาย</text>
+  <text x="532" y="296" class="s3">Whampoa</text>
+  <text x="482" y="334" class="s3">Hung Hom</text>
+  <text x="300" y="440" class="s3">Admiralty · ต่อรถบัส</text>
+
+  <!-- temples -->
+  <use href="#temple" x="392" y="62" width="56" height="56"/>
+  <use href="#temple" x="487" y="186" width="56" height="56"/>
+  <use href="#temple" x="460" y="270" width="52" height="52"/>
+  <!-- Kwun Yum statue (generic) at Repulse Bay -->
+  <g transform="translate(530,520)" filter="url(#sh3)"><ellipse cx="0" cy="22" rx="16" ry="5" fill="#d9c29a"/><path d="M-9,20 L-6,-8 Q0,-14 6,-8 L9,20Z" fill="#fff" stroke="#c9b28a" stroke-width="2"/><circle cx="0" cy="-16" r="7" fill="#ffe3a3" stroke="#c9b28a" stroke-width="2"/><circle cx="0" cy="-16" r="11" fill="none" stroke="#ffd54f" stroke-width="2"/></g>
+
+  <!-- pins -->
+  <g filter="url(#sh3)">
+    <g transform="translate(420,112)"><circle r="16" fill="#7b3fa0" stroke="#fff" stroke-width="3"/><text class="n3">1</text></g>
+    <g transform="translate(515,222)"><circle r="16" fill="#7b3fa0" stroke="#fff" stroke-width="3"/><text class="n3">2</text></g>
+    <g transform="translate(488,306)"><circle r="16" fill="#7b3fa0" stroke="#fff" stroke-width="3"/><text class="n3">3</text></g>
+    <g transform="translate(495,548)"><circle r="16" fill="#7b3fa0" stroke="#fff" stroke-width="3"/><text class="n3">4</text></g>
+    <g transform="translate(330,318)"><path d="M0,-12 C-6,-24 -18,-28 -18,-42 A18,18 0 1 1 18,-42 C18,-28 6,-24 0,-12Z" fill="#c8102e" stroke="#fff" stroke-width="3"/><text x="0" y="-42" font-size="16" text-anchor="middle" dominant-baseline="central">🏨</text></g>
+  </g>
+  <text x="440" y="72" class="l3">① วัดแชกง</text><text x="440" y="90" class="s3">Che Kung Temple</text>
+  <text x="600" y="232" class="l3" text-anchor="start">② วัดหวังต้าเซียน</text><text x="600" y="250" class="s3">Wong Tai Sin</text>
+  <text x="560" y="322" class="l3">③ กวนอิมฮองฮำ</text><text x="560" y="340" class="s3">Hung Hom Kwun Yum</text>
+  <text x="560" y="520" class="l3">④ รีพัลส์เบย์</text><text x="560" y="538" class="s3">เจ้าแม่กวนอิมริมทะเล</text>
+  <text x="290" y="345" class="l3" text-anchor="end">ที่พัก TST</text>
+
+  <!-- chips -->
+  <g transform="translate(300,180)"><rect x="-64" y="-14" width="128" height="28" rx="14" fill="#9a3820"/><text class="t3">🚇 Tuen Ma Line</text></g>
+  <g transform="translate(400,250)"><rect x="-66" y="-14" width="132" height="28" rx="14" fill="#00a040"/><text class="t3">🚇 Kwun Tong Line</text></g>
+  <g transform="translate(330,385)"><rect x="-60" y="-14" width="120" height="28" rx="14" fill="#5eb6e4"/><text class="t3">🚇 East Rail Line</text></g>
+  <g transform="translate(330,490)"><rect x="-70" y="-14" width="140" height="28" rx="14" fill="#e07a1f"/><text class="t3">🚌 บัส 6 / 6X / 260</text></g>
+</svg>
+    </div>
+    <div class="btnrow">
+      <button class="btn ghost js-big" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>ดูแผนที่ใหญ่</button>
+      <a class="btn primary" href="https://www.google.com/maps/dir/22.298067,114.171913/22.373419,114.182831/22.3427257,114.1932582/22.3079801,114.1857452/22.2347685,114.1984816" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>เปิดเส้นทางใน Google Maps</a>
+    </div>
+    <div class="legend"><span><i style="border-color:#9a3820;border-top-style:solid"></i>Tuen Ma</span><span><i style="border-color:#00a040;border-top-style:solid"></i>Kwun Tong</span><span><i style="border-color:#5eb6e4;border-top-style:solid"></i>East Rail</span><span><i style="border-color:#e07a1f"></i>รถบัส</span><span>* แผนที่การ์ตูน ไม่ได้ตามสเกลจริง</span></div>
+  </div>
+
+  <div class="road">
+    <div class="how" style="margin-top:0">
+      <h3>🚇 ที่พัก → ① วัดแชกง</h3>
+      <ol>
+        <li>เดินไปสถานี <b>East Tsim Sha Tsui</b> (เชื่อมกับสถานี TST ด้วยทางใต้ดิน)</li>
+        <li>นั่ง <b>Tuen Ma Line</b> ไปทาง Wu Kai Sha แล้วลงที่สถานี <b>Che Kung Temple</b> (ไม่ต้องเปลี่ยนสาย)</li>
+        <li>เดินไปวัดประมาณ 5 นาที</li>
+      </ol>
+      <div class="meta"><span>🕗 แนะนำออกเช้า วันเสาร์คนเยอะ</span></div>
+    </div>
+
+    <div class="phase"><div class="pin c4">1</div><h2>วัดแชกง (Che Kung Temple)</h2><span class="when c4b">เปิด 8:00–18:00</span></div>
+    <a class="stop" href="https://www.google.com/maps/search/?api=1&query=Sha+Tin+Che+Kung+Temple&query_place_id=ChIJyXIWeQcHBDQRAmd5ZYFLrXc" target="_blank" rel="noopener">
+      <div class="icon">🎡</div>
+      <div class="info"><b>Sha Tin Che Kung Temple</b><span>หมุนกังหันทองแดงตามเข็มนาฬิกาเสริมดวง แล้วตีกลอง 3 ครั้ง · มีเจ้าหน้าที่พูดไทยได้</span></div>
+      <div class="go">Maps <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M9 7h8v8"/></svg></div>
+    </a>
+
+    <div class="how">
+      <h3>🚇 ① → ② วัดหวังต้าเซียน</h3>
+      <ol>
+        <li>นั่ง Tuen Ma Line ไปทาง Tuen Mun แล้วลงที่ <b>Diamond Hill</b></li>
+        <li>เปลี่ยนเป็น <b>Kwun Tong Line (สายเขียว)</b> นั่ง 1 ป้ายไป <b>Wong Tai Sin</b></li>
+        <li>ออก <b>ทางออก B2</b> แล้วเดินตามป้ายประมาณ 3 นาที</li>
+      </ol>
+    </div>
+
+    <div class="phase"><div class="pin c4">2</div><h2>วัดหวังต้าเซียน (Wong Tai Sin)</h2><span class="when c4b">เปิด 7:30–16:30 · ปิดเร็ว!</span></div>
+    <a class="stop" href="https://www.google.com/maps/search/?api=1&query=Sik+Sik+Yuen+Wong+Tai+Sin+Temple&query_place_id=ChIJPyxIxtgGBDQRzvn_sxhWkTU" target="_blank" rel="noopener">
+      <div class="icon">🧧</div>
+      <div class="info"><b>Sik Sik Yuen Wong Tai Sin Temple</b><span>เขย่าเซียมซี ขอพรสุขภาพ โชคลาภ · มีกำแพงเก้ามังกรกับสวนด้านข้าง</span></div>
+      <div class="go">Maps <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M9 7h8v8"/></svg></div>
+    </a>
+    <div class="foodbox">
+      <h3>🍜 มื้อกลางวันแถวหวังต้าเซียน</h3>
+      <a class="food" href="https://www.google.com/maps/search/?api=1&query=Trusty+Congee+King+Lung+Cheung+Rd+Wong+Tai+Sin&query_place_id=ChIJ_0M0hNgGBDQRIW3_AqGa2aU" target="_blank" rel="noopener">
+        <div class="ficon">🥣</div>
+        <div class="finfo"><b>Trusty Congee King</b><span>โจ๊ก บะหมี่เกี๊ยว หมูเปรี้ยวหวาน · มีเมนูอังกฤษ · ในห้างข้างวัด</span><div class="ftags"><i>11:30–21:30</i><i>+ค่าบริการ 10%</i></div></div>
+        <div class="fgo">Maps <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M9 7h8v8"/></svg></div>
+      </a>
+      <a class="food" href="https://www.google.com/maps/search/?api=1&query=%E5%BE%B7%E5%88%A9%E5%B0%8F%E5%BB%9A+Chuk+Un+Wong+Tai+Sin&query_place_id=ChIJq64GTScHBDQRDpbNL9LLuJo" target="_blank" rel="noopener">
+        <div class="ficon">🍱</div>
+        <div class="finfo"><b>德利小廚 Deli Kitchen</b><span>ข้าวราดแกงแบบเลือกกับข้าว 3 อย่าง+ข้าว ราว HK$40 · ถูกมาก</span><div class="ftags"><i>10:00–21:00</i><i>ประหยัดสุด</i></div></div>
+        <div class="fgo">Maps <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M9 7h8v8"/></svg></div>
+      </a>
+      <a class="food" href="https://www.google.com/maps/search/?api=1&query=%E6%B4%AA%E8%A8%98%E7%B2%A5%E5%93%81+Wong+Tai+Sin+Plaza&query_place_id=ChIJJYsYZAAHBDQRDEB6JsOjN0Q" target="_blank" rel="noopener">
+        <div class="ficon">🍥</div>
+        <div class="finfo"><b>洪記粥品 Hung Kee Congee</b><span>โจ๊ก ก๋วยเตี๋ยวหลอดทอด · สั่งผ่าน QR · ในห้าง Temple Mall</span><div class="ftags"><i>7:00–22:00</i></div></div>
+        <div class="fgo">Maps <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M9 7h8v8"/></svg></div>
+      </a>
+
+    </div>
+
+    <div class="how">
+      <h3>🚇 ② → ③ กวนอิมฮองฮำ</h3>
+      <ol>
+        <li>นั่ง <b>Kwun Tong Line</b> ไปทาง Whampoa แล้วลงที่สถานีสุดสาย <b>Whampoa</b> (ไม่ต้องเปลี่ยนสาย)</li>
+        <li>เดินไปวัดที่ถนน Station Lane ประมาณ 10 นาที</li>
+      </ol>
+    </div>
+
+    <div class="phase"><div class="pin c4">3</div><h2>วัดกวนอิมฮองฮำ (Hung Hom Kwun Yum)</h2><span class="when c4b">เปิด 8:00–17:45</span></div>
+    <a class="stop" href="https://www.google.com/maps/search/?api=1&query=Hung+Hom+Kwun+Yum+Temple&query_place_id=ChIJ1-bAdd4ABDQR3PpfoRy9Uaw" target="_blank" rel="noopener">
+      <div class="icon">💰</div>
+      <div class="info"><b>Hung Hom Kwun Yum Temple</b><span>ขึ้นชื่อเรื่อง "ยืมเงินเจ้าแม่กวนอิม" · มีเจ้าหน้าที่และใบคำแนะนำ ไหว้ไม่เป็นก็ได้</span></div>
+      <div class="go">Maps <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M9 7h8v8"/></svg></div>
+    </a>
+    <div class="foodbox">
+      <h3>🥞 ของว่างแถวฮองฮำ</h3>
+      <a class="food" href="https://www.google.com/maps/search/?api=1&query=Hung+Hom+Pancake+53+Bulkeley+St&query_place_id=ChIJAxXyHN4ABDQRe4Ke8ivGIDM" target="_blank" rel="noopener">
+        <div class="ficon">🥭</div>
+        <div class="finfo"><b>Hung Hom Pancake</b><span>แพนเค้กม้วนมะม่วงนมข้น HK$23 · วาฟเฟิลไข่ · ร้านลุงเปิดมานาน</span><div class="ftags"><i>12:00–20:00</i><i>ปิดวันพฤหัส</i></div></div>
+        <div class="fgo">Maps <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M9 7h8v8"/></svg></div>
+      </a>
+
+    </div>
+
+    <div class="how">
+      <h3>🚇🚌 ③ → ④ รีพัลส์เบย์</h3>
+      <ol>
+        <li>เดินไปสถานี <b>Hung Hom</b> นั่ง <b>East Rail Line</b> ข้ามอ่าวไปลงที่ <b>Admiralty</b></li>
+        <li>ออกทางออก <b>C1</b> แล้วต่อรถบัส <b>6, 6X หรือ 260</b> (หรือขึ้นที่ต้นสาย Exchange Square ใน Central ก็ได้)</li>
+        <li>ลงที่ป้าย <b>Repulse Bay Beach</b> แล้วเดินเลียบชายหาดไปทางศาลเจ้า</li>
+      </ol>
+      <div class="meta"><span>🚌 บัสราว 30 นาที</span><span>🪟 นั่งชั้นบนฝั่งขวาเห็นวิวทะเล</span></div>
+    </div>
+
+    <div class="phase"><div class="pin c4">4</div><h2>รีพัลส์เบย์ (Repulse Bay)</h2><span class="when c4b">รูปปั้นเปิด 8:00–17:30</span></div>
+    <a class="stop" href="https://www.google.com/maps/search/?api=1&query=Repulse+Bay+Tin+Hau+and+Kwun+Yum+Statues&query_place_id=ChIJ-xHKJXmqBjQRl9m34c1r8k8" target="_blank" rel="noopener">
+      <div class="icon">🌊</div>
+      <div class="info"><b>เจ้าแม่กวนอิม & เจ้าแม่ทับทิม ริมหาด</b><span>รูปปั้นโมเสกสูงราว 10 เมตรริมทะเล · ใช้เวลา 20–30 นาที · ตอนเย็นแดดสวย</span></div>
+      <div class="go">Maps <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M9 7h8v8"/></svg></div>
+    </a>
+    <div class="foodbox">
+      <h3>🍽️ แถวรีพัลส์เบย์ (ร้านริมหาด ราคาค่อนข้างสูง)</h3>
+      <a class="food" href="https://www.google.com/maps/search/?api=1&query=Sip+Song+The+Pulse+Repulse+Bay&query_place_id=ChIJXTw2ib-rBjQRYk7U65lQnpg" target="_blank" rel="noopener">
+        <div class="ficon">🇹🇭</div>
+        <div class="finfo"><b>Sip Song</b><span>ร้านอาหารไทยริมหาด วิวทะเล มีดนตรีสด · ราคาสูง จานเล็ก</span><div class="ftags"><i>11:30–22:00</i><i>ถ้าคิดถึงอาหารไทย</i></div></div>
+        <div class="fgo">Maps <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M9 7h8v8"/></svg></div>
+      </a>
+      <a class="food" href="https://www.google.com/maps/search/?api=1&query=Amalfitana+Repulse+Bay&query_place_id=ChIJ1fWg3HiqBjQR9smj105FlUI" target="_blank" rel="noopener">
+        <div class="ficon">🍕</div>
+        <div class="finfo"><b>Amalfitana</b><span>พิซซ่าเตาฟืนริมหาด นั่งดูพระอาทิตย์ตก</span><div class="ftags"><i>11:30–21:00</i></div></div>
+        <div class="fgo">Maps <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M9 7h8v8"/></svg></div>
+      </a>
+
+      <p class="fnote">💡 ถ้าอยากประหยัด นั่งบัสกลับ Central แล้วต่อ MTR กลับไปกินแถวที่พัก TST จะถูกกว่า</p>
+    </div>
+
+    <div class="how">
+      <h3>🏨 ขากลับที่พัก</h3>
+      <ol>
+        <li>นั่งบัส 6, 6X หรือ 260 จากป้าย Repulse Bay Beach กลับไป Central หรือ Admiralty</li>
+        <li>นั่ง MTR <b>Tsuen Wan Line</b> ไปทาง Tsuen Wan แล้วลงที่ Tsim Sha Tsui</li>
+      </ol>
+    </div>
+
+    <div class="finish" style="margin-top:24px"><div class="pin">🏁</div><p>กลับที่พัก · วันรุ่งขึ้นบินกลับ 16:55 (UO702 · T2)</p></div>
+  </div>
+  </section>
+
+  <div class="tips">
+    <h3>💡 เตรียมตัว</h3>
+    <ul>
+      <li>มีบัตร Octopus จะสะดวกสุด ใช้ได้ทั้ง MTR รถราง และเรือ</li>
+      <li>สนามบาสคนเยอะช่วงสาย ไปเช้าจะถ่ายรูปง่ายกว่า และอย่าเกะกะคนที่เล่นบาสอยู่</li>
+      <li>ร้านท้องถิ่นพูดอังกฤษได้น้อย ชี้เมนูหรือเปิดรูปอาหารให้ดูจะง่ายกว่า และพกเงินสดไว้ด้วย</li>
+      <li>วันไปดิสนีย์ โหลดแอป Hong Kong Disneyland ไว้ดูเวลาเปิด โชว์ และเวลารอเครื่องเล่น</li>
+      <li>วันเสาร์วัดคนเยอะ ไปให้ถึงวัดแรกเช้าๆ และระวังวัดหวังต้าเซียนปิด 16:30</li>
+      <li>ราคาและเวลาอาจเปลี่ยน เช็กอีกทีก่อนเดินทาง</li>
+    </ul>
+  </div>
+
+  <footer>Hong Kong 🇭🇰 · ขอให้เที่ยวสนุก!</footer>
+</div>
+
+<!-- big map overlay -->
+<div class="overlay" id="overlay" role="dialog" aria-label="แผนที่ใหญ่">
+  <div class="ovbar">
+    <b>🗺️ แผนที่เส้นทาง</b>
+    <button type="button" id="zOut" aria-label="ซูมออก">−</button>
+    <button type="button" id="zIn" aria-label="ซูมเข้า">+</button>
+    <button type="button" class="close" id="closeBig" aria-label="ปิด">✕</button>
+  </div>
+  <div class="ovscroll"><div class="inner" id="bigInner"></div></div>
+  <div class="ovhint">กด + / − เพื่อซูม แล้วลากเลื่อนดูได้</div>
+</div>
+
+<script>
+(function(){
+  var tabs=document.querySelectorAll('#daytabs a');
+  var days=['day1','day2','day3'];
+  function show(d){
+    if(days.indexOf(d)<0) d='day1';
+    days.forEach(function(x){ document.getElementById(x).hidden = (x!==d); });
+    tabs.forEach(function(t){ t.classList.toggle('on', t.getAttribute('data-day')===d); });
+  }
+  function fromHash(){ show((location.hash||'').replace('#','')); }
+  tabs.forEach(function(t){ t.addEventListener('click',function(e){
+    e.preventDefault(); var d=t.getAttribute('data-day');
+    try{ history.replaceState(null,'','#'+d); }catch(err){ location.hash=d; }
+    show(d); window.scrollTo({top: document.getElementById('daytabs').offsetTop-2, behavior:'smooth'});
+  });});
+  window.addEventListener('hashchange',fromHash); fromHash();
+
+  var overlay=document.getElementById('overlay'), inner=document.getElementById('bigInner'), zoom=1;
+  function size(){ var base=Math.min(window.innerWidth-16,1100); inner.style.width=(base*zoom)+'px'; }
+  function open(e){
+    var sec=e.currentTarget.closest('.day'); var svg=sec.querySelector('.cmap');
+    inner.innerHTML=''; inner.appendChild(svg.cloneNode(true));
+    zoom=window.innerWidth<700?1.6:1; size();
+    overlay.classList.add('open'); document.body.style.overflow='hidden';
+  }
+  function close(){ overlay.classList.remove('open'); document.body.style.overflow=''; }
+  document.querySelectorAll('.js-big').forEach(function(b){ b.addEventListener('click',open); });
+  document.getElementById('closeBig').addEventListener('click',close);
+  document.getElementById('zIn').addEventListener('click',function(){zoom=Math.min(zoom+0.4,3.2);size();});
+  document.getElementById('zOut').addEventListener('click',function(){zoom=Math.max(zoom-0.4,1);size();});
+  overlay.addEventListener('click',function(e){ if(e.target===overlay) close(); });
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape') close(); });
+  window.addEventListener('resize',function(){ if(overlay.classList.contains('open')) size(); });
+})();
+</script>
+</body>
+</html>
